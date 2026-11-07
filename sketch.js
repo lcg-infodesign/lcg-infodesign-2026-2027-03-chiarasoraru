@@ -5,18 +5,18 @@ let maxNati = 0;
 // Margine attorno al grafico
 let margin = 40;
  
-// Anni 
-let years = [2020, 2021, 2022, 2023];
+// Anni (come testo, uguali ai nomi delle colonne del CSV)
+let years = ["2020", "2021", "2022", "2023"];
  
 // Direzione di ogni pala
 let angles = [-90, 0, 90, 180];
  
 // Ogni anno un colore
 let colorScale = {
-  2020: '#C9B1E0',   
-  2021: '#EBD84B',   
-  2022: '#F0645A',   
-  2023: '#8FB04A'    
+  2020: '#C9B1E0',
+  2021: '#EBD84B',
+  2022: '#F0645A',
+  2023: '#8FB04A'
 }
  
 async function setup() {
@@ -26,8 +26,8 @@ async function setup() {
  
  
   for (let rowNumber = 0; rowNumber < data.getRowCount(); rowNumber++) {
-    for (let i = 0; i < years.length; i++) {
-      let natiAnno = data.getNum(rowNumber, "" + years[i]);
+    for (let i = 0; i < 4; i++) {
+      let natiAnno = data.getNum(rowNumber, years[i]);
  
       if (natiAnno > maxNati) {
         maxNati = natiAnno;
@@ -39,11 +39,6 @@ async function setup() {
 function draw() {
   background(30, 36, 60);
  
-  // Finché il CSV non è caricato non c'è niente da disegnare.
-  if (data === undefined) {
-    return;
-  }
- 
   noStroke();
  
   // Titolo
@@ -51,7 +46,7 @@ function draw() {
   textSize(28);
   text("La natalità europea", margin, margin + 24);
   textSize(14);
-   text("Bambini nati da madri di 25-34 anni", margin, margin + 52);
+  text("Bambini nati da madri di 25-34 anni", margin, margin + 52);
   text("in 37 paesi europei tra il 2020 e il 2023", margin, margin + 70);
  
   // Legenda: una girandola ha 4 pale, uno per anno; ogni anno ha il suo colore e la sua direzione.
@@ -94,15 +89,14 @@ function draw() {
   let maxLength = dimCella / 2 - 10;
   let minLength = maxLength * 0.35;
  
-  // testoRollover contiene i testi da mostrare quando il mouse è sopra una girandola
-  let testoRollover = [];
+  // rigaSelezionata contiene la riga del CSV sotto il mouse (-1 = nessuna)
+  let rigaSelezionata = -1;
  
   let xCorrente = margin;
   let yCorrente = 230;
  
   // Ogni riga del CSV diventa una girandola.
   for (let rowNumber = 0; rowNumber < numeroPaesi; rowNumber++) {
-    let country = data.getString(rowNumber, "Paese");
     let code = data.getString(rowNumber, "Codice");
  
     // Sigla del paese nell'angolo della cella.
@@ -114,8 +108,8 @@ function draw() {
     let nati = [];
     let natiMax = 0;
     let natiMin = maxNati;
-    for (let i = 0; i < years.length; i++) {
-      let natiAnno = data.getNum(rowNumber, "" + years[i]);
+    for (let i = 0; i < 4; i++) {
+      let natiAnno = data.getNum(rowNumber, years[i]);
       nati.push(natiAnno);
       if (natiAnno > natiMax) {
         natiMax = natiAnno;
@@ -131,24 +125,21 @@ function draw() {
     //l'anno con più nati ha il la pala lunga quanto la girandola,
     // l'anno con meno nati ha il pala lunga il 50% della girandola, gli altri stanno in mezzo.
     let lunghezze = [];
-    for (let i = 0; i < years.length; i++) {
+    for (let i = 0; i < 4; i++) {
       lunghezze.push(map(nati[i], natiMin, natiMax, lunghezzaMax * 0.5, lunghezzaMax));
     }
  
     // Girandola al centro della cella (un po' più in basso per lasciare spazio alla sigla).
     mioGirandola(xCorrente + 0.5 * dimColonna, yCorrente + 0.5 * dimRiga + 6, dimCella, lunghezze);
  
-    // Verifica se il puntatore si trova dentro questa cella e memorizza paese e nati dei 4 anni.
+    // Verifica se il puntatore si trova dentro questa cella e salva la riga.
     if (
       mouseX >= xCorrente &&
       mouseX <= xCorrente + dimColonna &&
       mouseY >= yCorrente &&
       mouseY <= yCorrente + dimRiga
     ) {
-      testoRollover = [country];
-      for (let i = 0; i < years.length; i++) {
-        testoRollover.push(years[i] + ": " + nati[i]);
-      }
+      rigaSelezionata = rowNumber;
     }
  
     // Passa alla cella successiva
@@ -160,18 +151,18 @@ function draw() {
   }
  
   // Mostra paese e nati vicino al puntatore solo quando questo si trova sopra una girandola.
-  if (testoRollover.length > 0) {
+  if (rigaSelezionata >= 0) {
     // Riquadro scuro dietro il testo
     fill(15, 18, 35);
     rect(mouseX + 8, mouseY + 8, 130, 92);
  
     textSize(14);
     fill(255);
-    text(testoRollover[0], mouseX + 16, mouseY + 28);
+    text(data.getString(rigaSelezionata, "Paese"), mouseX + 16, mouseY + 28);
     textSize(12);
-    for (let i = 0; i < years.length; i++) {
+    for (let i = 0; i < 4; i++) {
       fill(colorScale[years[i]]);
-      text(testoRollover[i + 1], mouseX + 16, mouseY + 46 + i * 15);
+      text(years[i] + ": " + data.getNum(rigaSelezionata, years[i]), mouseX + 16, mouseY + 46 + i * 15);
     }
   }
 }
@@ -183,7 +174,7 @@ function mioGirandola(_x, _y, _size, _lunghezze) {
   angleMode(DEGREES);
  
   // Una pala per anno: si ruota e si disegna un triangolo con un vertice al centro
-  for (let i = 0; i < years.length; i++) {
+  for (let i = 0; i < 4; i++) {
     push();
     rotate(angles[i]);
     fill(colorScale[years[i]]);
