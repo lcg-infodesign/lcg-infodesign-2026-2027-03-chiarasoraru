@@ -49,7 +49,7 @@ function draw() {
   text("Bambini nati da madri di 25-34 anni in 37 paesi", margin, margin + 52);
   text("europei tra il 2020 e il 2023", margin, margin + 70);
  
-  // Legenda: un fiore ha 4 petali, uno per anno; ogni anno ha il suo colore e la sua direzione.
+  // Legenda: un fiore ha 4 petali
   let xLegenda = width - margin - 440;
  
   // Riquadro dietro la legenda
@@ -93,7 +93,7 @@ function draw() {
   let maxLength = dimCella / 2 - 10;
   let minLength = maxLength * 0.35;
  
-  // rigaSelezionata è la riga del CSV sotto il mouse; -1 se il mouse non è sopra nessun fiore
+  // rigaSelezionata è la riga del CSV sotto il mouse
   let rigaSelezionata = -1;
  
   let xCorrente = margin;
@@ -128,14 +128,13 @@ function draw() {
     // La dimensione del fiore dipende dai nati del paese.
     let lunghezzaMax = map(natiMax, 0, maxNati, minLength, maxLength);
  
-    // L'anno con più nati ha il petalo lungo quanto il fiore,
-    // l'anno con meno nati ha il petalo lungo il 50% del fiore, gli altri stanno in mezzo.
+    // L'anno con più nati ha il petalo lungo quanto il fiore
     let lunghezze = [];
     for (let i = 0; i < 4; i++) {
       lunghezze.push(map(nati[i], natiMin, natiMax, lunghezzaMax * 0.5, lunghezzaMax));
     }
  
-    // Fiore al centro della cella (un po' più in basso per lasciare spazio alla sigla).
+    // Fiore al centro della cella 
     mioFiore(xCorrente + 0.5 * dimColonna, yCorrente + 0.5 * dimRiga + 6, dimCella, lunghezze);
  
     // Verifica se il puntatore si trova dentro questa cella e memorizza la riga corrispondente.
@@ -148,7 +147,7 @@ function draw() {
       rigaSelezionata = rowNumber;
     }
  
-    // Passa alla cella successiva
+    // Passa alla cella dopos
     xCorrente = xCorrente + dimColonna;
     if (xCorrente >= width - margin - 1) {
       yCorrente = yCorrente + dimRiga;
@@ -173,12 +172,12 @@ function draw() {
   }
 }
  
-// Fiore con 4 petali (ellissi) che partono dal centro
+// Fiore con 4 petali 
 function mioFiore(_x, _y, _size, _lunghezze) {
   push();
   translate(_x, _y);
  
-  // Un petalo per anno: si ruota e si disegna un'ellisse che parte dal centro
+  // Un petalo per anno
   for (let i = 0; i < 4; i++) {
     push();
     rotate(angles[i]);
